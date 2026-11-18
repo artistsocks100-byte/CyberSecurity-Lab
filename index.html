@@ -1,0 +1,142 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CYBER INTELLIGENCE</title>
+<style>
+*{box-sizing:border-box}
+body{
+ margin:0;background:#080d18;color:#e8f1ff;
+ font-family:Arial,sans-serif;padding:20px;
+}
+header{padding:20px 0;border-bottom:1px solid #26364d}
+h1{color:#38bdf8;letter-spacing:2px}
+.sub{color:#8294ad;font-size:12px}
+.container{max-width:850px;margin:auto}
+.card{
+ background:#111c2e;border:1px solid #263b56;
+ border-radius:13px;padding:20px;margin-top:18px;
+}
+h2{font-size:17px;color:#7dd3fc}
+input{
+ width:100%;padding:14px;background:#081323;
+ border:1px solid #34506d;border-radius:8px;
+ color:white;font-size:15px;margin:10px 0;
+}
+button{
+ background:#0284c7;color:white;border:0;
+ padding:13px 17px;border-radius:8px;
+ font-weight:bold;cursor:pointer;
+}
+button:active{opacity:.7}
+.result{
+ margin-top:15px;padding:15px;
+ background:#081323;border-radius:8px;
+ overflow-wrap:anywhere;line-height:1.8;
+}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.stat{
+ background:#14243a;padding:16px;border-radius:10px;
+}
+.stat b{display:block;color:#38bdf8;font-size:20px}
+footer{color:#657991;text-align:center;margin:35px 0;font-size:12px}
+</style>
+</head>
+<body>
+<div class="container">
+<header>
+ <div class="sub">CYBER SECURITY INTELLIGENCE SYSTEM</div>
+ <h1>CYBER INTELLIGENCE</h1>
+ <div class="sub">NETWORK · IP · DOMAIN · THREAT ANALYSIS</div>
+</header>
+
+<div class="card">
+<h2>01 / IP ADDRESS ANALYSIS</h2>
+<input id="ip" placeholder="IP 주소 입력 (예: 8.8.8.8)">
+<button onclick="ipCheck()">IP 분석</button>
+<div id="ipResult" class="result">분석 대기 중...</div>
+</div>
+
+<div class="card">
+<h2>02 / URL SECURITY SCANNER</h2>
+<input id="url" placeholder="https://example.com">
+<button onclick="urlCheck()">URL 분석</button>
+<div id="urlResult" class="result">분석 대기 중...</div>
+</div>
+
+<div class="card">
+<h2>03 / DNS LOOKUP</h2>
+<input id="domain" placeholder="도메인 입력 (예: google.com)">
+<button onclick="dnsCheck()">DNS 조회</button>
+<div id="dnsResult" class="result">조회 대기 중...</div>
+</div>
+
+<div class="card">
+<h2>04 / SECURITY TOOLS</h2>
+<div class="grid">
+<div class="stat">IP 정보<b>IP LOOKUP</b></div>
+<div class="stat">위험 링크<b>URL SCAN</b></div>
+<div class="stat">도메인<b>DNS LOOKUP</b></div>
+<div class="stat">보안 평판<b>THREAT INTEL</b></div>
+</div>
+</div>
+
+<footer>CYBER INTELLIGENCE · SECURITY ANALYSIS</footer>
+</div>
+
+<script>
+async function ipCheck(){
+ const ip=document.getElementById('ip').value.trim();
+ const out=document.getElementById('ipResult');
+ if(!ip){out.textContent='IP 주소를 입력하세요.';return;}
+ out.textContent='조회 중...';
+ try{
+  const r=await fetch('https://ipwho.is/'+encodeURIComponent(ip));
+  const d=await r.json();
+  if(!d.success)throw Error('조회할 수 없는 IP입니다.');
+  out.innerHTML=
+  'IP: '+d.ip+'<br>국가: '+d.country+
+  '<br>지역: '+d.region+'<br>도시: '+d.city+
+  '<br>ISP: '+d.connection.isp+
+  '<br>ASN: '+d.connection.asn;
+ }catch(e){out.textContent='조회 실패: '+e.message;}
+}
+async function dnsCheck(){
+ const domain=document.getElementById('domain').value.trim();
+ const out=document.getElementById('dnsResult');
+ if(!domain){out.textContent='도메인을 입력하세요.';return;}
+ out.textContent='DNS 조회 중...';
+ try{
+  const types=['A','AAAA','MX','NS','TXT'];
+  let html='';
+  for(const type of types){
+   const r=await fetch('https://dns.google/resolve?name='+
+   encodeURIComponent(domain)+'&type='+type);
+   const d=await r.json();
+   html+='<b>'+type+'</b><br>'+
+   (d.Answer||[]).map(x=>x.data).join('<br>')+
+   '<br><br>';
+  }
+  out.innerHTML=html||'DNS 정보가 없습니다.';
+ }catch(e){out.textContent='조회 실패: '+e.message;}
+}
+async function urlCheck(){
+ const value=document.getElementById('url').value.trim();
+ const out=document.getElementById('urlResult');
+ try{
+  const u=new URL(value);
+  if(!['http:','https:'].includes(u.protocol))throw Error();
+  out.innerHTML='분석 주소: '+u.href+
+  '<br>도메인: '+u.hostname+
+  '<br>프로토콜: '+u.protocol+
+  '<br>HTTPS: '+(u.protocol==='https:'?'사용':'미사용')+
+  '<br>포트: '+(u.port||'기본 포트')+
+  '<br><br>주의: 이것은 기본 구조 분석이며 악성 여부를 확정하지 않습니다.'+
+  '<br><a target="_blank" rel="noopener" href="https://www.virustotal.com/gui/home/url">VirusTotal에서 평판 검사하기</a>';
+ }catch(e){out.textContent='올바른 HTTP 또는 HTTPS 주소를 입력하세요.';}
+}
+</script>
+</body>
+</html>
